@@ -1,0 +1,46 @@
+---
+kind: Service
+metadata:
+  name: hello-node
+  labels:
+    app: hello-node
+spec:
+  ports:
+  - name: http
+    port: 8080
+  selector:
+    app: hello-node
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: hello-node
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: hello-node
+        version: v1
+    spec:
+      containers:
+      - image: us.gcr.io/tavish-200820/hello-node:v1
+        imagePullPolicy: IfNotPresent
+        name: hello-node
+        ports:
+        - containerPort: 8080
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hello-node
+  annotations:
+    kubernetes.io/ingress.class: istio
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /hello/
+        backend:
+          serviceName: hello-node
+          servicePort: 8080
